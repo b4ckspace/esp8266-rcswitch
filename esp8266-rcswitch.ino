@@ -96,7 +96,7 @@ void setup() {
   Serial.begin(115200);
 
   rcSwitch.enableTransmit(D6);
-  rcSwitch.setRepeatTransmit(20);
+  rcSwitch.setRepeatTransmit(RCSWITCH_TRANSMISSIONS);
   
   htu21.begin();
 
