@@ -2,9 +2,9 @@
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
 #include <SimpleTimer.h>
-#include <RCSwitch.h>
-#include <QueueArray.h>
+#include <RCSwitch.h>h
 #include "settings.h"
+#include <queue>
 
 uint8_t mqttBaseTopicSegmentCount = 0;
 char convertBuffer[10] = {0};
@@ -15,9 +15,9 @@ typedef struct {
   bool on;
 } rcJob;
 
-unsigned long nextJobMillis = 0;
+std::queue<rcJob> rcJobQueue;
 
-QueueArray<rcJob> rcJobQueue;
+unsigned long nextJobMillis = 0;
 
 WiFiClient wifiClient;
 PubSubClient mqttClient;
@@ -134,8 +134,9 @@ void setup() {
 void loop() {
   mqttConnect();
 
-  if (!rcJobQueue.isEmpty() && millis() > nextJobMillis) {
-    rcJob job = rcJobQueue.dequeue();
+  if (!rcJobQueue.empty() && millis() > nextJobMillis) {
+    rcJob job = rcJobQueue.front();
+    rcJobQueue.pop();
 
     if (job.on) {
       rcSwitch.switchOn(job.systemCode, job.unitCode);
