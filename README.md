@@ -2,7 +2,7 @@
 
 Subscribes to an MQTT topic/patch and reacts on switch commands for rc power sockets. It also publishes humidity and temperature regulary
 
-![Schematic](https://raw.githubusercontent.com/b4ckspace/esp8266-rcswitch/master/wiring.png "How to connect")
+![Schematic](https://raw.githubusercontent.com/b4ckspace/esp8266-rcswitch/master/wiring.jpg "How to connect")
 
 ## config.h
 
