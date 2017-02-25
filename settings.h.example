@@ -1,0 +1,16 @@
+#define HOSTNAME "ESP-RCSwitch"
+
+#define WIFI_SSID "....."
+#define WIFI_PASSWORD "....."
+
+#define MQTT_HOST "mqtt.core.bckspc.de"
+#define MQTT_PORT 1883
+
+#define SENSOR_REFRESH_SECONDS  (2 * 60)
+#define RCSWITCH_PAUSE_MS 300
+
+const char* MQTT_TOPIC_DELIMITER = "/";
+
+const char* MQTT_TOPIC_RCSWITCH = "actors/powersockets/location/#";
+const char* MQTT_TOPIC_TEMPERATURE = "sensor/temperature/location";
+const char* MQTT_TOPIC_HUMIDITY = "sensor/humidity/location";
