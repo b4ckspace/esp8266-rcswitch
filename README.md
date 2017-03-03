@@ -11,5 +11,4 @@ You have to copy the config.h.example to config.h and replace the strings with y
 ## dependencies
 
 * PubSubClient
-* ArrayQueue
 * Arduino/ESP8266
