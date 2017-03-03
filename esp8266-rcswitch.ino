@@ -28,9 +28,9 @@ RCSwitch rcSwitch = RCSwitch();
 
 void mqttConnect() {
   while (!mqttClient.connected()) {
-    if (mqttClient.connect(HOSTNAME)) {
-      Serial.println("MQTT connect success");
+    if (mqttClient.connect(HOSTNAME, MQTT_TOPIC_STATE, 1, true, "disconnected")) {
       mqttClient.subscribe(MQTT_TOPIC_RCSWITCH);
+      mqttClient.publish(MQTT_TOPIC_STATE, "connected", true);
     } else {
       Serial.println("MQTT connect failed!");
       delay(1000);
@@ -121,7 +121,7 @@ void setup() {
     delay(500);
   }
 
-  timer.setInterval(SENSOR_REFRESH_SECONDS * 1000L, []() {
+  timer.setInterval(SENSOR_REFRESH_MS, []() {
     dtostrf(htu21.readHumidity(), 4, 2, convertBuffer);
     mqttClient.publish(MQTT_TOPIC_HUMIDITY, convertBuffer);
 

@@ -1,17 +1,20 @@
-#define HOSTNAME "ESP-RCSwitch"
+#define LOCATION "lounge"
 
-#define WIFI_SSID "....."
-#define WIFI_PASSWORD "....."
+#define HOSTNAME "ESP-RC-" LOCATION
 
-#define MQTT_HOST "mqtt.core.bckspc.de"
+#define WIFI_SSID "-------"
+#define WIFI_PASSWORD "---------"
+
+#define MQTT_HOST "mqtt.youdomain.de"
 #define MQTT_PORT 1883
 
-#define SENSOR_REFRESH_SECONDS  (2 * 60)
-#define RCSWITCH_PAUSE_MS 300
-#define RCSWITCH_TRANSMISSIONS 10
+#define SENSOR_REFRESH_MS  (5 * 60 * 1000)
+#define RCSWITCH_PAUSE_MS 100
+#define RCSWITCH_TRANSMISSIONS 15
 
 const char* MQTT_TOPIC_DELIMITER = "/";
 
-const char* MQTT_TOPIC_RCSWITCH = "actors/powersockets/location/#";
-const char* MQTT_TOPIC_TEMPERATURE = "sensor/temperature/location";
-const char* MQTT_TOPIC_HUMIDITY = "sensor/humidity/location";
+const char* MQTT_TOPIC_RCSWITCH = "actors/powersockets/" LOCATION "/#";
+const char* MQTT_TOPIC_TEMPERATURE = "sensor/temperature/" LOCATION;
+const char* MQTT_TOPIC_HUMIDITY = "sensor/humidity/" LOCATION;
+const char* MQTT_TOPIC_STATE = "state/powersockets/" LOCATION;
