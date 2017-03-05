@@ -8,6 +8,8 @@
 #define MQTT_HOST "mqtt.youdomain.de"
 #define MQTT_PORT 1883
 
+#define OTA_PASSWORD "tollesPasswort!"
+
 #define SENSOR_REFRESH_MS  (5 * 60 * 1000)
 #define RCSWITCH_PAUSE_MS 100
 #define RCSWITCH_TRANSMISSIONS 15

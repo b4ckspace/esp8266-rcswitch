@@ -1,6 +1,7 @@
 #include "SparkFunHTU21D.h"
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
+#include <ArduinoOTA.h>
 #include <SimpleTimer.h>
 #include <RCSwitch.h>h
 #include "settings.h"
@@ -112,14 +113,18 @@ void setup() {
   
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  mqttClient.setClient(wifiClient);
-  mqttClient.setServer(MQTT_HOST, MQTT_PORT);
-  mqttClient.setCallback(mqttCallback);
-
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
   }
+  
+  mqttClient.setClient(wifiClient);
+  mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+  mqttClient.setCallback(mqttCallback);
+
+  ArduinoOTA.setHostname(HOSTNAME);
+  ArduinoOTA.setPassword(OTA_PASSWORD);
+  ArduinoOTA.begin();
 
   timer.setInterval(SENSOR_REFRESH_MS, []() {
     dtostrf(htu21.readHumidity(), 4, 2, convertBuffer);
@@ -149,4 +154,5 @@ void loop() {
 
   timer.run();
   mqttClient.loop();
+  ArduinoOTA.handle();
 }
