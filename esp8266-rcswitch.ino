@@ -61,49 +61,51 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   char *token;
   rcJob job;
 
-  if ( strncmp (topic,MQTT_TOPIC_MQTTESP,strlen(MQTT_TOPIC_MQTTESP)) == 0 ) {
+  if (strncmp(topic, MQTT_TOPIC_MQTTESP, strlen(MQTT_TOPIC_MQTTESP)) == 0) {
+    
     // MQTT Connection TEST - LED Indicator
     if (strncmp((char*) payload, "ON", length) == 0) {
-      digitalWrite(BUILTIN_LED, LOW);   // Remember: LOW == LED OFF
+      digitalWrite(BUILTIN_LED, LOW);
     } else if (strncmp((char*) payload, "OFF", length) == 0) {
       digitalWrite(BUILTIN_LED, HIGH);
+    }
+
+    return;
+  }
+    
+  // RC-Switch
+  token = strtok((char*) topic, MQTT_TOPIC_DELIMITER);
+
+  while (token != NULL) {
+    if (segment == mqttBaseTopicSegmentCount) {
+        strncpy(job.systemCode, token, 5);
+    } else if (segment == mqttBaseTopicSegmentCount + 1) {
+        strncpy(job.unitCode, token, 5);
+    }
+
+    // Bounds checking...
+    if (segment > mqttBaseTopicSegmentCount + 1) {
+      return;
+    }
+
+    token = strtok(NULL, MQTT_TOPIC_DELIMITER);
+    segment++;
+  }
+
+  // Check for powersocket-commands
+  if (isCodeValid(job.systemCode) && isCodeValid(job.unitCode)) {
+    
+    if (strncmp((char*) payload, "ON", length) == 0) {
+      job.on = true;
+    } else if (strncmp((char*) payload, "OFF", length) == 0) {
+      job.on = false;
     } else {
       return;
     }
-    
-  }else{
-    // RC-Switch
-    token = strtok((char*) topic, MQTT_TOPIC_DELIMITER);
   
-    while (token != NULL) {
-      if (segment == mqttBaseTopicSegmentCount) {
-          strncpy(job.systemCode, token, 5);
-      } else if (segment == mqttBaseTopicSegmentCount + 1) {
-          strncpy(job.unitCode, token, 5);
-      }
-  
-      // Bounds checking...
-      if (segment > mqttBaseTopicSegmentCount + 1) {
-        return;
-      }
-  
-      token = strtok(NULL, MQTT_TOPIC_DELIMITER);
-      segment++;
-    }
-
-    // Check for powersocket-commands
-    if (isCodeValid(job.systemCode) && isCodeValid(job.unitCode)) {
-      if (strncmp((char*) payload, "ON", length) == 0) {
-        job.on = true;
-      } else if (strncmp((char*) payload, "OFF", length) == 0) {
-        job.on = false;
-      } else {
-        return;
-      }
-    
-      rcJobQueue.push(job);
-    }
+    rcJobQueue.push(job);
   }
+  
 }
 
 void setup() {
