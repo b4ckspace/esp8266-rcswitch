@@ -31,6 +31,7 @@ void mqttConnect() {
   while (!mqttClient.connected()) {
     if (mqttClient.connect(HOSTNAME, MQTT_TOPIC_STATE, 1, true, "disconnected")) {
       mqttClient.subscribe(MQTT_TOPIC_RCSWITCH);
+      mqttClient.subscribe(MQTT_TOPIC_MQTTESP);
       mqttClient.publish(MQTT_TOPIC_STATE, "connected", true);
     } else {
       Serial.println("MQTT connect failed!");
@@ -59,41 +60,54 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   uint8_t segment = 0;
   char *token;
   rcJob job;
-  
-  token = strtok((char*) topic, MQTT_TOPIC_DELIMITER);
-  while (token != NULL) {
-    
-    if (segment == mqttBaseTopicSegmentCount) {
-        strncpy(job.systemCode, token, 5);
-    } else if (segment == mqttBaseTopicSegmentCount + 1) {
-        strncpy(job.unitCode, token, 5);
-    }
 
-    // Bounds checking...
-    if (segment > mqttBaseTopicSegmentCount + 1) {
+  if ( strncmp (topic,MQTT_TOPIC_MQTTESP,strlen(MQTT_TOPIC_MQTTESP)) == 0 ) {
+    // MQTT Connection TEST - LED Indicator
+    if (strncmp((char*) payload, "ON", length) == 0) {
+      digitalWrite(BUILTIN_LED, LOW);   // Remember: LOW == LED OFF
+    } else if (strncmp((char*) payload, "OFF", length) == 0) {
+      digitalWrite(BUILTIN_LED, HIGH);
+    } else {
       return;
     }
-
-    token = strtok(NULL, MQTT_TOPIC_DELIMITER);
-    segment++;
-  }
+    
+  }else{
+    // RC-Switch
+    token = strtok((char*) topic, MQTT_TOPIC_DELIMITER);
   
-  if (!isCodeValid(job.systemCode) || !isCodeValid(job.unitCode)) {
-    return;
-  }
+    while (token != NULL) {
+      if (segment == mqttBaseTopicSegmentCount) {
+          strncpy(job.systemCode, token, 5);
+      } else if (segment == mqttBaseTopicSegmentCount + 1) {
+          strncpy(job.unitCode, token, 5);
+      }
+  
+      // Bounds checking...
+      if (segment > mqttBaseTopicSegmentCount + 1) {
+        return;
+      }
+  
+      token = strtok(NULL, MQTT_TOPIC_DELIMITER);
+      segment++;
+    }
 
-  if (strncmp((char*) payload, "ON", length) == 0) {
-    job.on = true;
-  } else if (strncmp((char*) payload, "OFF", length) == 0) {
-    job.on = false;
-  } else {
-    return;
+    // Check for powersocket-commands
+    if (isCodeValid(job.systemCode) && isCodeValid(job.unitCode)) {
+      if (strncmp((char*) payload, "ON", length) == 0) {
+        job.on = true;
+      } else if (strncmp((char*) payload, "OFF", length) == 0) {
+        job.on = false;
+      } else {
+        return;
+      }
+    
+      rcJobQueue.push(job);
+    }
   }
-
-  rcJobQueue.push(job);
 }
 
 void setup() {
+  pinMode(BUILTIN_LED, OUTPUT);
   Serial.begin(115200);
 
   rcSwitch.enableTransmit(D6);
