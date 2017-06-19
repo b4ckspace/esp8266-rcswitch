@@ -157,11 +157,15 @@ void loop() {
     rcJob job = rcJobQueue.front();
     rcJobQueue.pop();
 
+    noInterrupts();
+    
     if (job.on) {
       rcSwitch.switchOn(job.systemCode, job.unitCode);
     } else {
       rcSwitch.switchOff(job.systemCode, job.unitCode);
     }
+    
+    interrupts(); 
     
     nextJobMillis = millis() + RCSWITCH_PAUSE_MS;
   }
