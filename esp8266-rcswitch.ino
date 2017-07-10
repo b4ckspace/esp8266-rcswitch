@@ -134,6 +134,7 @@ void setup() {
     delay(500);
   }
   
+  
   mqttClient.setClient(wifiClient);
   mqttClient.setServer(MQTT_HOST, MQTT_PORT);
   mqttClient.setCallback(mqttCallback);
@@ -160,13 +161,15 @@ void loop() {
     rcJobQueue.pop();
 
     noInterrupts();
+    digitalWrite(BUILTIN_LED, LOW);
     
     if (job.on) {
       rcSwitch.switchOn(job.systemCode, job.unitCode);
     } else {
       rcSwitch.switchOff(job.systemCode, job.unitCode);
     }
-    
+
+    digitalWrite(BUILTIN_LED, HIGH);
     interrupts(); 
     
     nextJobMillis = millis() + RCSWITCH_PAUSE_MS;
