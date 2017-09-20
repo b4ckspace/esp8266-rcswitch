@@ -9,6 +9,8 @@
 
 uint8_t mqttBaseTopicSegmentCount = 0;
 char convertBuffer[10] = {0};
+bool isSending = false;
+unsigned long lastAlienSignalMs = 0;
 
 typedef struct {
   char systemCode[6] = {0};
@@ -26,6 +28,14 @@ PubSubClient mqttClient;
 SimpleTimer timer;
 HTU21D htu21;
 RCSwitch rcSwitch = RCSwitch();
+
+void onAlienSignal() {
+  if (isSending) {
+    return;
+  }
+
+  lastAlienSignalMs = millis();
+}
 
 void mqttConnect() {
   while (!mqttClient.connected()) {
@@ -112,6 +122,9 @@ void setup() {
   pinMode(BUILTIN_LED, OUTPUT);
   Serial.begin(115200);
 
+  pinMode(INTERRUPT_PIN, INPUT);
+  attachInterrupt(INTERRUPT_PIN, onAlienSignal, CHANGE);
+
   rcSwitch.enableTransmit(D6);
   rcSwitch.setRepeatTransmit(RCSWITCH_TRANSMISSIONS);
   
@@ -157,17 +170,28 @@ void loop() {
   mqttConnect();
 
   if (!rcJobQueue.empty() && millis() > nextJobMillis) {
+
+    // Wait because there are alien signals!
+    while(lastAlienSignalMs + ALIEN_SIGNAL_BACKOFF_MS < millis()) {
+      delay(2);
+    }
+
+
     rcJob job = rcJobQueue.front();
     rcJobQueue.pop();
 
     noInterrupts();
     digitalWrite(BUILTIN_LED, LOW);
+
+    isSending = true;
     
     if (job.on) {
       rcSwitch.switchOn(job.systemCode, job.unitCode);
     } else {
       rcSwitch.switchOff(job.systemCode, job.unitCode);
     }
+    
+    isSending = false;
 
     digitalWrite(BUILTIN_LED, HIGH);
     interrupts(); 
