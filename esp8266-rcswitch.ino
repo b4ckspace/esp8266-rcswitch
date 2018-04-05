@@ -118,6 +118,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 }
 
 void setup() {
+
+  // Power-Up Delay
+  delay(2500);
+  
   pinMode(BUILTIN_LED, OUTPUT);
   Serial.begin(115200);
 
