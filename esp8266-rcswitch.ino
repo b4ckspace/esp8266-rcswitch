@@ -8,6 +8,8 @@
 #include <queue>
 
 uint8_t mqttBaseTopicSegmentCount = 0;
+uint8_t mqttRetryCounter = 0;
+
 char convertBuffer[10] = {0};
 
 typedef struct {
@@ -33,9 +35,16 @@ void mqttConnect() {
       mqttClient.subscribe(MQTT_TOPIC_RCSWITCH);
       mqttClient.subscribe(MQTT_TOPIC_MQTTESP);
       mqttClient.publish(MQTT_TOPIC_STATE, "connected", true);
+      mqttRetryCounter = 0;
+      
     } else {
       Serial.println("MQTT connect failed!");
-      delay(1000);
+      
+      if (mqttRetryCounter++ > MQTT_MAX_CONNECT_RETRY) {
+        ESP.restart();
+      }
+      
+      delay(2000);
     }
   }
 }
