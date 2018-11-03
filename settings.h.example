@@ -15,6 +15,9 @@
 #define RCSWITCH_PAUSE_MS 100
 #define RCSWITCH_TRANSMISSIONS 15
 
+#define INTERRUPT_PIN D4
+#define ALIEN_SIGNAL_BACKOFF_MS 20
+
 const char* MQTT_TOPIC_DELIMITER = "/";
 
 const char* MQTT_TOPIC_RCSWITCH = "actors/powersockets/" LOCATION "/#";
